@@ -1,0 +1,32 @@
+#####prepare#####
+#set worksheet
+setwd('The location of the downloaded clinical file')
+
+#load package
+options(stringsAsFactors = F)
+library(XML)
+
+#####Acquire clinical data in bulk#####
+#function
+LUAD_cl_xmls <- dir("LUAD-clinical/",
+                    pattern = "*.xml$",
+                    recursive = T)
+
+#.xml transformed dataframe
+cldf <- function(x){
+  xmlresult <- xmlParse(file.path("LUAD-clinical/",x))
+  xmltop2 <- xmlRoot(xmlresult)
+  LUADcldf <- xmlToDataFrame(xmltop2[2])
+  return(t(LUADcldf))
+}
+
+#Data merging
+cl <- lapply(LUAD_cl_xmls,cldf)
+LUAD_cl <- t(do.call(cbind,cl))
+LUAD_cl_df <- data.frame(LUAD_cl)
+
+#write .csv
+write.csv(LUAD_cl_df,"LUAD_clinical.csv",row.names = TRUE)
+
+
+
