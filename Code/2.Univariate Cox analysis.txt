@@ -1,0 +1,67 @@
+
+rm(list = ls())
+library("survival")
+library("survminer")
+
+#Load clinical.csv
+cl <- read.csv("cl.csv",header = T,row.names = 1,check.names = F)
+
+#0(Alive) and 1(Dead):
+event <- cl$vital_status
+event <- ifelse(event =="Alive",0,1)
+cl$event <- event
+table(cl$event)
+
+#OS_time
+cl$OS_time <- sprintf("%0.0f", (as.numeric(cl[,3])+as.numeric(cl[,4]))/30)
+cl$OS_time <- as.numeric(cl$OS_time)
+
+#Age grouping
+age <- cl$age
+age <- ifelse(age<=59,"young","old")
+cl$age <- age
+
+#Factoring
+str(cl)
+
+#Gender grouping
+cl <- within(cl, {
+  gender <- factor(gender, labels = c('Female', 'Male'))})  # female for control
+res.cox <- coxph(Surv(OS_time, event) ~ gender, data = cl)
+res.cox
+summary(res.cox)
+
+#age
+cl <- within(cl, {
+  age <- factor(age, labels = c('young', 'old'))})  # young for control
+res.cox <- coxph(Surv(OS_time, event) ~ age, data = cl)
+res.cox
+summary(res.cox)
+
+#stage_event
+cl <- within(cl, {
+  stage_event <- factor(stage_event, labels = c('I', 'II','III','IV'))})  # stage I for control
+res.cox <- coxph(Surv(OS_time, event) ~ stage_event, data = cl)
+res.cox
+summary(res.cox)
+
+#T
+cl <- within(cl, {
+  T <- factor(T, labels = c('T1', 'T2','T3','T4'))})  # T1 for control
+res.cox <- coxph(Surv(OS_time, event) ~ T, data = cl)
+res.cox
+summary(res.cox)
+
+#N
+cl <- within(cl, {
+  N <- factor(N, labels = c('N0','N1', 'N2'))})  # N0 for control
+res.cox <- coxph(Surv(OS_time, event) ~ N, data = cl)
+res.cox
+summary(res.cox)
+
+#M
+cl <- within(cl, {
+  M <- factor(M, labels = c('M0','M1'))})  # M0 for control
+res.cox <- coxph(Surv(OS_time, event) ~ M, data = cl)
+res.cox
+summary(res.cox)
